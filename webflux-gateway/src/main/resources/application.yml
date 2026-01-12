@@ -1,0 +1,47 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: webflux-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+#              uri: https://jsonplaceholder.typicode.com
+              uri: lb://user-service
+              predicates:
+                - Path=/users/**
+#              # Customer Filter Gateway factories
+              filters:
+                - AddResponseHeader=X-Source-Gateway, Api Gateway
+                - RewritePath=/users/?(?<segment>.*), /api/v1/users/${segment}
+
+          # custom service name with lowercase
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+
+#                  # RemoveRequestHeader
+#                  - RemoveRequestHeader=X-Request-Foo
+#
+#                  # AddRequestHeadersIfNotPresent
+#                  - AddRequestHeadersIfNotPresent=X-Request-Color-1:blue,X-Request-Color-2:green
+#
+#                  # AddRequestParameter
+#                  - AddRequestParameter=red, blue
+#
+#                  # AddResponseHeader
+#                  - AddResponseHeader=X-Response-Red, Blue
+#                  - AddResponseHeader=X-Response-Black, White, false
+#
+#                  # RemoveRequestHeader
+#                  - RemoveResponseHeader=X-Response-Foo
+
+# Enable log Gateway
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.loadbalancer: TRACE
